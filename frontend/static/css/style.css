@@ -1,0 +1,112 @@
+:root {
+    --viridian: #40826D;
+    --viridian-dark: #2C5B4C;
+    --viridian-light: #9CCFBE;
+    --viridian-lighter: #E8F4F0;
+    --accent: #826D40;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--viridian-lighter) !important;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    background-color: var(--viridian) !important;
+}
+
+.navbar-brand {
+    color: white !important;
+    font-weight: 500;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s;
+    background-color: white;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--viridian) !important;
+    border-color: var(--viridian) !important;
+    padding: 12px 24px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+    background-color: var(--viridian-dark) !important;
+    border-color: var(--viridian-dark) !important;
+}
+
+.btn-success {
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+
+.footer {
+    margin-top: auto;
+    border-top: 1px solid #dee2e6;
+    background-color: white !important;
+}
+
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,.1);
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    color: var(--viridian) !important;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(64, 130, 109, 0.25) !important;
+    border-color: var(--viridian) !important;
+}
+
+.form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(64, 130, 109, 0.25) !important;
+    border-color: var(--viridian) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--viridian) !important;
+    border-color: var(--viridian) !important;
+}
+
+.card-title {
+    color: var(--viridian-dark);
+}
+
+.alert-success {
+    background-color: var(--viridian-lighter);
+    border-color: var(--viridian-light);
+    color: var(--viridian-dark);
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.form-text {
+    color: var(--viridian-dark) !important;
+    opacity: 0.8;
+} 

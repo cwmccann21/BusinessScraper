@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viridian Systems - Business Search Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-leaf me-2"></i>
+                Viridian Systems
+            </a>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">
+                            <span class="d-block mb-2">Business Intelligence Search</span>
+                            <small class="text-muted fs-6 fw-normal">Powered by Viridian Systems</small>
+                        </h2>
+                        
+                        <form id="searchForm" method="POST">
+                            {{ form.csrf_token }}
+                            
+                            <div class="mb-3">
+                                {{ form.location.label(class="form-label") }}
+                                {{ form.location(class="form-control", placeholder=form.location.description) }}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ form.location.description }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.keyword.label(class="form-label") }}
+                                {{ form.keyword(class="form-control", placeholder=form.keyword.description) }}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ form.keyword.description }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.radius.label(class="form-label") }}
+                                    {{ form.radius(class="form-select") }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.min_rating.label(class="form-label") }}
+                                    {{ form.min_rating(class="form-select") }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.business_status.label(class="form-label") }}
+                                {{ form.business_status(class="form-select") }}
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                {{ form.include_websites(class="form-check-input") }}
+                                {{ form.include_websites.label(class="form-check-label") }}
+                            </div>
+                            
+                            <div class="d-grid">
+                                {{ form.submit(class="btn btn-primary btn-lg") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results" class="mt-4" style="display: none;">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <i class="fas fa-search me-2"></i>
+                                Search Results
+                            </h3>
+                            <div id="resultsContent" class="mt-3">
+                                <!-- Results will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loading" class="text-center mt-4" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Searching businesses... This may take a few minutes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3">
+        <div class="container text-center">
+            <span class="text-muted">© 2024 Viridian Systems - Advanced Business Intelligence Solutions</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
