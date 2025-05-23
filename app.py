@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-from scraper import statewide_search, save_to_excel
+from scraper import statewide_search
 import os
 from dotenv import load_dotenv
 

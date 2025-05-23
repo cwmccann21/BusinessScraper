@@ -3,11 +3,10 @@
     "builds": [
         {
             "src": "app.py",
-            "use": "@vercel/python",
+            "use": "@vercel/python@3.1.0",
             "config": {
                 "maxLambdaSize": "15mb",
-                "runtime": "python3.9",
-                "pip": ["--no-deps"]
+                "runtime": "python3.9"
             }
         }
     ],
