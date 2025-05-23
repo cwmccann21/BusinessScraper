@@ -5,20 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Search Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .btn-primary {
+            background-color: #40916c;
+            border-color: #40916c;
+            padding: 10px 25px;
+        }
+        .btn-primary:hover {
+            background-color: #2d6a4f;
+            border-color: #2d6a4f;
+        }
+        .form-control:focus {
+            border-color: #40916c;
+            box-shadow: 0 0 0 0.2rem rgba(64, 145, 108, 0.25);
+        }
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table th {
+            background-color: #40916c;
+            color: white;
+            border: none;
+        }
+        .spinner-border {
+            color: #40916c;
+        }
+        .location-badge {
+            background-color: #40916c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 5px;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Business Search Tool</h1>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Search Locations</h5>
+                <div class="location-badges mb-3">
+                    <span class="location-badge">New York City</span>
+                    <span class="location-badge">Albany</span>
+                    <span class="location-badge">Syracuse</span>
+                    <span class="location-badge">Buffalo</span>
+                    <span class="location-badge">Long Island</span>
+                </div>
+            </div>
+        </div>
         <div class="card">
             <div class="card-body">
                 <form id="searchForm" class="needs-validation" novalidate>
                     <div class="mb-3">
                         <label for="niche" class="form-label">Business Type</label>
                         <input type="text" class="form-control" id="niche" required placeholder="e.g., restaurant, florist, gym">
+                        <div class="invalid-feedback">Please enter a business type</div>
                     </div>
                     <div class="mb-3">
                         <label for="radius" class="form-label">Search Radius (meters)</label>
-                        <input type="number" class="form-control" id="radius" value="50000" min="1000" max="50000">
+                        <input type="range" class="form-range" id="radius" min="1000" max="50000" step="1000" value="50000">
+                        <div class="d-flex justify-content-between">
+                            <small>1km</small>
+                            <small id="radiusValue">50km</small>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="maxResults" class="form-label">Maximum Results</label>
@@ -28,14 +92,14 @@
                         <input type="checkbox" class="form-check-input" id="includeWebsites">
                         <label class="form-check-label" for="includeWebsites">Include businesses with websites only</label>
                     </div>
-                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
                 </form>
             </div>
         </div>
         <div id="results" class="mt-4" style="display: none;">
             <div class="card">
                 <div class="card-body">
-                    <h3>Results</h3>
+                    <h3 class="mb-4">Results</h3>
                     <div id="resultsList"></div>
                 </div>
             </div>
@@ -44,12 +108,19 @@
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2">Searching businesses... This may take a few minutes.</p>
+            <p class="mt-2">Searching businesses across New York State... This may take a few minutes.</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Update radius value display
+        const radiusInput = document.getElementById('radius');
+        const radiusValue = document.getElementById('radiusValue');
+        radiusInput.addEventListener('input', function() {
+            radiusValue.textContent = (this.value / 1000) + 'km';
+        });
+
         document.getElementById('searchForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -59,6 +130,7 @@
             
             loading.style.display = 'block';
             results.style.display = 'none';
+            resultsList.innerHTML = '';
             
             const data = {
                 niche: document.getElementById('niche').value,
@@ -78,46 +150,44 @@
                 
                 const result = await response.json();
                 
-                if (response.ok) {
-                    resultsList.innerHTML = '';
-                    if (result.results && result.results.length > 0) {
-                        const table = document.createElement('table');
-                        table.className = 'table table-striped';
-                        table.innerHTML = `
-                            <thead>
+                if (!response.ok) {
+                    throw new Error(result.error || 'An error occurred while fetching results');
+                }
+                
+                if (result.results && result.results.length > 0) {
+                    const table = document.createElement('table');
+                    table.className = 'table table-striped';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Rating</th>
+                                <th>Website</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.results.map(place => `
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Address</th>
-                                    <th>Phone</th>
-                                    <th>Rating</th>
-                                    <th>Website</th>
+                                    <td>${place.Name || 'N/A'}</td>
+                                    <td>${place.Address || 'N/A'}</td>
+                                    <td>${place.Phone || 'N/A'}</td>
+                                    <td>${place.Rating ? `${place.Rating} ⭐` : 'N/A'}</td>
+                                    <td>${place.Website ? `<a href="${place.Website}" target="_blank" class="btn btn-sm btn-outline-primary">Visit</a>` : 'N/A'}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${result.results.map(place => `
-                                    <tr>
-                                        <td>${place.Name || 'N/A'}</td>
-                                        <td>${place.Address || 'N/A'}</td>
-                                        <td>${place.Phone || 'N/A'}</td>
-                                        <td>${place.Rating || 'N/A'}</td>
-                                        <td>${place.Website ? `<a href="${place.Website}" target="_blank">Visit</a>` : 'N/A'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        `;
-                        resultsList.appendChild(table);
-                    } else {
-                        resultsList.innerHTML = '<p class="text-center">No results found</p>';
-                    }
-                    results.style.display = 'block';
+                            `).join('')}
+                        </tbody>
+                    `;
+                    resultsList.appendChild(table);
                 } else {
-                    throw new Error(result.error || 'Failed to fetch results');
+                    resultsList.innerHTML = '<div class="alert alert-info">No results found for your search criteria</div>';
                 }
             } catch (error) {
                 resultsList.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-                results.style.display = 'block';
             } finally {
                 loading.style.display = 'none';
+                results.style.display = 'block';
             }
         });
     </script>
