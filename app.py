@@ -1,14 +1,41 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from flask_cors import CORS
 from scraper import search_businesses
 import os
 from dotenv import load_dotenv
 import traceback
+import csv
+from io import StringIO
+import datetime
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+def convert_to_csv(places):
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write headers
+    headers = ['Name', 'Address', 'Phone', 'Website', 'Rating', 'Total Reviews', 'Price Level', 'Currently Open']
+    writer.writerow(headers)
+    
+    # Write data
+    for place in places:
+        row = [
+            place.get('Name', 'N/A'),
+            place.get('Address', 'N/A'),
+            place.get('Phone', 'N/A'),
+            place.get('Website', 'N/A'),
+            place.get('Rating', 'N/A'),
+            place.get('User Ratings Total', 'N/A'),
+            place.get('Price Level', 'N/A'),
+            'Yes' if place.get('Currently Open') else 'No'
+        ]
+        writer.writerow(row)
+    
+    return output.getvalue()
 
 @app.route('/')
 def index():
@@ -64,6 +91,34 @@ def search():
     except Exception as e:
         app.logger.error(f"Error in search: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': 'An error occurred while processing your request'}), 500
+
+@app.route('/export-csv', methods=['POST'])
+def export_csv():
+    try:
+        data = request.get_json()
+        if not data or 'results' not in data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        csv_data = convert_to_csv(data['results'])
+        
+        # Create filename with timestamp
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"business_results_{timestamp}.csv"
+        
+        # Create response with CSV data
+        output = StringIO()
+        output.write(csv_data)
+        output.seek(0)
+        
+        return send_file(
+            output,
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        app.logger.error(f"Error in CSV export: {str(e)}\n{traceback.format_exc()}")
+        return jsonify({'error': 'An error occurred while exporting to CSV'}), 500
 
 @app.errorhandler(404)
 def not_found_error(error):

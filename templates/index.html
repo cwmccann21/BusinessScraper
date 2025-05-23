@@ -168,7 +168,12 @@
         <div id="results" class="mt-4" style="display: none;">
             <div class="card">
                 <div class="card-body">
-                    <h3 class="mb-4">Results</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0">Results</h3>
+                        <button id="exportButton" class="btn btn-viridian">
+                            <i class="fas fa-download me-2"></i>Export to CSV
+                        </button>
+                    </div>
                     <div id="resultsList"></div>
                 </div>
             </div>
@@ -189,6 +194,42 @@
         
         radiusInput.addEventListener('input', function() {
             radiusValue.textContent = (this.value / 1000) + 'km';
+        });
+
+        let searchResults = []; // Store the search results
+
+        document.getElementById('exportButton').addEventListener('click', async function() {
+            if (!searchResults.length) {
+                alert('No results to export');
+                return;
+            }
+
+            try {
+                const response = await fetch('/export-csv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ results: searchResults })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                // Create a blob from the response and trigger download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = response.headers.get('content-disposition')?.split('filename=')[1] || 'business_results.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (error) {
+                alert('Failed to export results: ' + error.message);
+            }
         });
 
         document.getElementById('searchForm').addEventListener('submit', async function(e) {
@@ -227,7 +268,9 @@
                     throw new Error(result.error || 'An error occurred while fetching results');
                 }
                 
-                if (result.results && result.results.length > 0) {
+                searchResults = result.results || []; // Store the results
+                
+                if (searchResults.length > 0) {
                     const table = document.createElement('table');
                     table.className = 'table table-hover';
                     table.innerHTML = `
@@ -240,7 +283,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${result.results.map(place => `
+                            ${searchResults.map(place => `
                                 <tr>
                                     <td>
                                         <strong>${place.Name || 'N/A'}</strong><br>
