@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-from scraper import statewide_search
+from scraper import search_businesses
 import os
 from dotenv import load_dotenv
 import traceback
@@ -25,19 +25,34 @@ def search():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
 
+        location = data.get('location')
+        if not location:
+            return jsonify({'error': 'Location is required'}), 400
+
         niche = data.get('niche')
         if not niche:
-            return jsonify({'error': 'Niche is required'}), 400
+            return jsonify({'error': 'Business type is required'}), 400
 
         radius = int(data.get('radius', 50000))
         include_websites = data.get('includeWebsites', False)
         max_results = int(data.get('maxResults', 100))
+        min_rating = float(data.get('minRating', 0))
+        open_now = data.get('openNow', False)
         
         api_key = os.getenv('GOOGLE_MAPS_API_KEY')
         if not api_key:
             return jsonify({'error': 'API key not configured'}), 500
 
-        places = statewide_search(api_key, niche, radius, max_results, include_websites)
+        places = search_businesses(
+            api_key=api_key,
+            location_query=location,
+            niche=niche,
+            radius=radius,
+            max_results=max_results,
+            include_websites=include_websites,
+            min_rating=min_rating,
+            open_now=open_now
+        )
         
         if not places:
             return jsonify({'results': [], 'message': 'No results found'}), 200
@@ -45,7 +60,7 @@ def search():
         return jsonify({'results': places})
     except ValueError as e:
         app.logger.error(f"Value Error: {str(e)}")
-        return jsonify({'error': 'Invalid input parameters'}), 400
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         app.logger.error(f"Error in search: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': 'An error occurred while processing your request'}), 500
