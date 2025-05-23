@@ -8,7 +8,6 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key')
 
 @app.route('/')
 def index():
