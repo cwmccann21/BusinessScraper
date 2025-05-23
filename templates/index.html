@@ -132,7 +132,10 @@
                             <label for="minRating" class="form-label">Minimum Rating</label>
                             <select class="form-select" id="minRating">
                                 <option value="0">Any Rating</option>
+                                <option value="1">1+ Stars</option>
+                                <option value="2">2+ Stars</option>
                                 <option value="3">3+ Stars</option>
+                                <option value="3.5">3.5+ Stars</option>
                                 <option value="4">4+ Stars</option>
                                 <option value="4.5">4.5+ Stars</option>
                             </select>
@@ -144,14 +147,16 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="includeWebsites">
-                                <label class="form-check-label" for="includeWebsites">Only businesses with websites</label>
-                            </div>
+                        <div class="col-md-4">
+                            <label for="websiteFilter" class="form-label">Website Filter</label>
+                            <select class="form-select" id="websiteFilter">
+                                <option value="all">All Businesses</option>
+                                <option value="with">Only With Website</option>
+                                <option value="without">Only Without Website</option>
+                            </select>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-check">
+                        <div class="col-md-4">
+                            <div class="form-check mt-4">
                                 <input type="checkbox" class="form-check-input" id="openNow">
                                 <label class="form-check-label" for="openNow">Currently open</label>
                             </div>
@@ -243,12 +248,14 @@
             results.style.display = 'none';
             resultsList.innerHTML = '';
             
+            const websiteFilter = document.getElementById('websiteFilter').value;
+            
             const data = {
                 location: document.getElementById('location').value,
                 niche: document.getElementById('niche').value,
                 radius: parseInt(document.getElementById('radius').value),
                 maxResults: parseInt(document.getElementById('maxResults').value),
-                includeWebsites: document.getElementById('includeWebsites').checked,
+                websiteFilter: websiteFilter,
                 openNow: document.getElementById('openNow').checked,
                 minRating: parseFloat(document.getElementById('minRating').value)
             };

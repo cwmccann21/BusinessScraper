@@ -3,6 +3,23 @@ import time
 import json
 
 def geocode_location(api_key, location):
+    # Normalize the location string to handle any casing
+    # This will properly capitalize city and state names
+    try:
+        # Split by comma and strip whitespace
+        parts = [part.strip() for part in location.split(',')]
+        if len(parts) >= 2:
+            # Title case the city, uppercase the state
+            city = parts[0].title()
+            state = parts[1].strip().upper()
+            location = f"{city}, {state}"
+        else:
+            # If only one part, just title case it
+            location = location.strip().title()
+    except Exception:
+        # If any error in formatting, use the original string
+        location = location.strip()
+
     endpoint = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
         "address": location,
@@ -76,7 +93,7 @@ def fetch_places_nearby(api_key, location, radius, niche, open_now=False, next_p
     next_page_token = data.get("next_page_token")
     return places, next_page_token
 
-def search_businesses(api_key, location_query, niche, radius=50000, max_results=100, include_websites=False, min_rating=0, open_now=False):
+def search_businesses(api_key, location_query, niche, radius=50000, max_results=100, website_filter='all', min_rating=0, open_now=False):
     try:
         location = geocode_location(api_key, location_query)
     except ValueError as e:
@@ -98,13 +115,19 @@ def search_businesses(api_key, location_query, niche, radius=50000, max_results=
             
             if details:
                 place.update(details)
-                if (include_websites and place.get("Website", "N/A") != "N/A") or \
-                   (not include_websites):
-                    detailed_places.append(place)
-                    total_places += 1
-                    if total_places >= max_results:
-                        print(f"Reached max result limit of {max_results}.")
-                        return detailed_places
+                
+                # Apply website filter
+                has_website = place.get("Website", "N/A") != "N/A"
+                if website_filter == 'with' and not has_website:
+                    continue
+                if website_filter == 'without' and has_website:
+                    continue
+                
+                detailed_places.append(place)
+                total_places += 1
+                if total_places >= max_results:
+                    print(f"Reached max result limit of {max_results}.")
+                    return detailed_places
 
         if next_page_token:
             print("Fetching next page of results...")

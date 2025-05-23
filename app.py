@@ -99,23 +99,44 @@ def export_csv():
         if not data or 'results' not in data:
             return jsonify({'error': 'No data provided'}), 400
 
-        csv_data = convert_to_csv(data['results'])
+        # Create a single StringIO buffer
+        output = StringIO()
+        writer = csv.writer(output)
+        
+        # Write headers
+        headers = ['Name', 'Address', 'Phone', 'Website', 'Rating', 'Total Reviews', 'Price Level', 'Currently Open']
+        writer.writerow(headers)
+        
+        # Write data
+        for place in data['results']:
+            row = [
+                place.get('Name', 'N/A'),
+                place.get('Address', 'N/A'),
+                place.get('Phone', 'N/A'),
+                place.get('Website', 'N/A'),
+                place.get('Rating', 'N/A'),
+                place.get('User Ratings Total', 'N/A'),
+                place.get('Price Level', 'N/A'),
+                'Yes' if place.get('Currently Open') else 'No'
+            ]
+            writer.writerow(row)
         
         # Create filename with timestamp
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f"business_results_{timestamp}.csv"
         
-        # Create response with CSV data
-        output = StringIO()
-        output.write(csv_data)
+        # Reset buffer position
         output.seek(0)
         
-        return send_file(
+        # Create response with explicit headers
+        response = send_file(
             output,
             mimetype='text/csv',
-            as_attachment=True,
-            download_name=filename
+            as_attachment=True
         )
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
     except Exception as e:
         app.logger.error(f"Error in CSV export: {str(e)}\n{traceback.format_exc()}")
         return jsonify({'error': 'An error occurred while exporting to CSV'}), 500
